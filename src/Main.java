@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.FlowLayout;
 import javax.swing.JFrame;
 import uk.ac.leedsbeckett.oop.LBUGraphics;
@@ -36,53 +37,96 @@ public class Main extends LBUGraphics
                 case "about":
                     about();
                     break;
+
                 case "penup":
                     drawOff();
                     break;
+
                 case "pendown":
                     drawOn();
                     break;
+
                 case "left":
                     if (parts.length < 2) {
-                        System.out.println("Missing angle for 'left'");
+                        System.out.println("❗ Missing angle for 'left'");
                     } else {
-                        int angle = Integer.parseInt(parts[1]);
-                        left(angle);
+                        try {
+                            int angle = Integer.parseInt(parts[1]);
+                            left(angle);
+                        } catch (NumberFormatException e) {
+                            System.out.println("❗ 'left' requires a numeric angle.");
+                        }
                     }
                     break;
+
                 case "right":
                     if (parts.length < 2) {
-                        System.out.println("Missing angle for 'right'");
+                        System.out.println("❗ Missing angle for 'right'");
                     } else {
-                        int angle = Integer.parseInt(parts[1]);
-                        right(angle);
+                        try {
+                            int angle = Integer.parseInt(parts[1]);
+                            right(angle);
+                        } catch (NumberFormatException e) {
+                            System.out.println("❗ 'right' requires a numeric angle.");
+                        }
                     }
                     break;
+
                 case "move":
                     if (parts.length < 2) {
-                        System.out.println("Missing distance for 'move'");
+                        System.out.println("❗ Missing distance for 'move'");
                     } else {
-                        int dist = Integer.parseInt(parts[1]);
-                        forward(dist);
+                        try {
+                            int dist = Integer.parseInt(parts[1]);
+                            forward(dist);
+                        } catch (NumberFormatException e) {
+                            System.out.println("❗ 'move' requires a numeric distance.");
+                        }
                     }
                     break;
+
                 case "reverse":
                     if (parts.length < 2) {
-                        System.out.println("Missing distance for 'reverse'");
+                        System.out.println("❗ Missing distance for 'reverse'");
                     } else {
-                        int dist = Integer.parseInt(parts[1]);
-                        forward(-dist); // Negative distance = backward
+                        try {
+                            int dist = Integer.parseInt(parts[1]);
+                            forward(-dist);
+                        } catch (NumberFormatException e) {
+                            System.out.println("❗ 'reverse' requires a numeric distance.");
+                        }
                     }
                     break;
+
                 case "reset":
                     reset();
                     break;
+
                 case "clear":
                     clear();
                     break;
+
+                case "red":
+                    setPenColour(Color.RED);
+                    break;
+
+                case "green":
+                    setPenColour(Color.GREEN);
+                    break;
+
+                case "black":
+                    setPenColour(Color.BLACK);
+                    break;
+
+                case "white":
+                    setPenColour(Color.WHITE);
+                    break;
+
                 default:
-                    System.out.println("Unknown command: " + command);
+                    System.out.println("❌ Unknown command: '" + command + "'");
+                    break;
             }
+
         } catch (NumberFormatException e) {
             System.out.println("Invalid numeric parameter.");
         } catch (Exception e) {
