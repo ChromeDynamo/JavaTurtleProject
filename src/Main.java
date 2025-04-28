@@ -3,8 +3,26 @@ import java.awt.FlowLayout;
 import javax.swing.JFrame;
 import uk.ac.leedsbeckett.oop.LBUGraphics;
 
+
+
 public class Main extends LBUGraphics
 {
+    private void drawSquare(int side) {
+        int originalX = getxPos();
+        int originalY = getyPos();
+        int originalAngle = getDirection();
+
+        for (int i = 0; i < 4; i++) {
+            forward(side);
+            right(90);
+        }
+
+        // Return to original state
+        setxPos(originalX);
+        setyPos(originalY);
+        pointTurtle(originalAngle);
+    }
+
     public static void main(String[] args)
     {
         new Main(); //create instance of class that extends LBUGraphics (could be separate class without main), gets out of static context
@@ -21,7 +39,11 @@ public class Main extends LBUGraphics
         about();                                                                //call the LBUGraphics about method to display version information.
     }
 
-
+    @Override
+    public void about() {
+        super.about(); // Call the original about
+        displayMessage("Project by ChromeDynamo"); // Add your name here
+    }
     @Override
     public void processCommand(String command) {
         if (command == null || command.trim().isEmpty()) {
@@ -121,6 +143,42 @@ public class Main extends LBUGraphics
                 case "white":
                     setPenColour(Color.WHITE);
                     break;
+
+                case "square":
+                    if (parts.length < 2) {
+                        System.out.println("❗ Missing side length for 'square'");
+                    } else {
+                        try {
+                            int side = Integer.parseInt(parts[1]);
+                            if (side <= 0) {
+                                System.out.println("❗ Side length must be positive.");
+                            } else {
+                                drawSquare(side);
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("❗ 'square' requires a numeric side length.");
+                        }
+                    }
+                    break;
+
+                case "penwidth":
+                    if (parts.length < 2) {
+                        System.out.println("❗ Missing width for 'penwidth'");
+                    } else {
+                        try {
+                            int width = Integer.parseInt(parts[1]);
+                            if (width <= 0) {
+                                System.out.println("❗ Pen width must be positive.");
+                            } else {
+                                setStroke(width);
+                                System.out.println("✔️ Pen width set to " + width);
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("❗ 'penwidth' requires a numeric width.");
+                        }
+                    }
+                    break;
+
 
                 default:
                     System.out.println("❌ Unknown command: '" + command + "'");
