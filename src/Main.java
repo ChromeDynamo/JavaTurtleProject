@@ -179,6 +179,32 @@ public class Main extends LBUGraphics
                     }
                     break;
 
+                case "pencolour":
+                    if (parts.length < 2) {
+                        System.out.println("❗ Missing RGB values for 'pencolour'");
+                    } else {
+                        try {
+                            String[] rgbParts = parts[1].split(",");
+                            if (rgbParts.length != 3) {
+                                System.out.println("❗ 'pencolour' needs 3 values separated by commas, like pencolour 255,0,0");
+                            } else {
+                                int r = Integer.parseInt(rgbParts[0]);
+                                int g = Integer.parseInt(rgbParts[1]);
+                                int b = Integer.parseInt(rgbParts[2]);
+
+                                if (isValidColorValue(r) && isValidColorValue(g) && isValidColorValue(b)) {
+                                    setPenColour(new Color(r, g, b));
+                                    System.out.println("✔️ Pen colour set to RGB(" + r + "," + g + "," + b + ")");
+                                } else {
+                                    System.out.println("❗ RGB values must be between 0 and 255.");
+                                }
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("❗ 'pencolour' values must be numeric.");
+                        }
+                    }
+                    break;
+
 
                 default:
                     System.out.println("❌ Unknown command: '" + command + "'");
@@ -191,5 +217,9 @@ public class Main extends LBUGraphics
             System.out.println("Error executing command: " + e.getMessage());
         }
     }
+    private boolean isValidColorValue(int value) {
+        return value >= 0 && value <= 255;
+    }
+
 
 }
