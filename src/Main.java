@@ -2,9 +2,24 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import javax.swing.JFrame;
 import uk.ac.leedsbeckett.oop.LBUGraphics;
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.io.BufferedReader;
+import java.io.FileReader;
+
 
 public class Main extends LBUGraphics
 {
+    private boolean recordingEnabled = true;
+
+    private List<String> commandHistory = new ArrayList<>();
+
     private void drawSquare(int side) {
         int originalX = getxPos();
         int originalY = getyPos();
@@ -19,79 +34,6 @@ public class Main extends LBUGraphics
         setxPos(originalX);
         setyPos(originalY);
         pointTurtle(originalAngle);
-    }
-
-    private boolean isDrawableTriangle(int a, int b, int c) {
-        // Triangle inequality
-        if (a + b <= c || a + c <= b || b + c <= a)
-            return false;
-
-        // Law of Cosines for angles
-        double angleA = Math.toDegrees(Math.acos((b*b + c*c - a*a) / (2.0 * b * c)));
-        double angleB = Math.toDegrees(Math.acos((a*a + c*c - b*b) / (2.0 * a * c)));
-        double angleC = 180 - angleA - angleB;
-
-        // Check angle sum tolerance (to catch floating-point error)
-        double angleSum = angleA + angleB + angleC;
-        if (Math.abs(angleSum - 180) > 1.0) return false;
-
-        // Check angles are not too extreme
-        if (angleA < 20 || angleB < 20 || angleC < 20) return false;
-        if (angleA > 150 || angleB > 150 || angleC > 150) return false;
-
-        return true;
-    }
-
-    private void forwardTo(int x, int y) {
-        int currentX = getxPos();
-        int currentY = getyPos();
-
-        double dx = x - currentX;
-        double dy = y - currentY;
-        double angleRad = Math.atan2(dy, dx);
-        int distance = (int)Math.hypot(dx, dy);
-
-        pointTurtle((int)Math.toDegrees(angleRad));
-        forward(distance);
-    }
-
-    private void drawCustomTriangle(int a, int b, int c) {
-        int originalX = getxPos();
-        int originalY = getyPos();
-        int originalAngle = getDirection();
-        drawOff();
-
-        // Start at point A (current position)
-        int xA = originalX;
-        int yA = originalY;
-
-        // Point B is directly right (side a)
-        int xB = xA + a;
-        int yB = yA;
-
-        // Calculate angles using Law of Cosines
-        double angleA = Math.acos((b*b + c*c - a*a) / (2.0 * b * c));
-        double angleB = Math.acos((a*a + c*c - b*b) / (2.0 * a * c));
-
-        // Calculate point C using side b and angle A
-        int xC = xA + (int)(b * Math.cos(angleA));
-        int yC = yA + (int)(b * Math.sin(angleA));
-
-        // Draw the triangle
-        setxPos(xA);
-        setyPos(yA);
-        drawOn();
-
-        forwardTo(xB, yB);  // Draw side AB (length a)
-        forwardTo(xC, yC);  // Draw side BC (length c)
-        forwardTo(xA, yA);  // Draw side CA (length b)
-
-        // Restore turtle state
-        drawOff();
-        setxPos(originalX);
-        setyPos(originalY);
-        pointTurtle(originalAngle);
-        drawOn();
     }
 
     private void drawEquilateralTriangle(int side) {
@@ -109,11 +51,77 @@ public class Main extends LBUGraphics
         pointTurtle(originalAngle);
     }
 
+    private void saveImageToFile(String filename) {
+        try {
+            BufferedImage image = getBufferedImage(); // from LBUGraphics
+            File file = new File(filename);
 
-    // Helper to calculate internal angle C
-    private int getInternalAngle(int a, int b, int c) {
-        double angleC = Math.acos((a*a + b*b - c*c) / (2.0 * a * b));
-        return (int)Math.toDegrees(angleC);
+            // Extract format (e.g. "png", "jpg")
+            String format = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
+
+            boolean success = ImageIO.write(image, format, file);
+
+            if (success) {
+                System.out.println("✔️ Image saved as " + filename);
+            } else {
+                System.out.println("❗ Failed to save image. Unsupported format?");
+            }
+        } catch (IOException e) {
+            System.out.println("❗ Error saving image: " + e.getMessage());
+        }
+    }
+
+    private void loadImageFromFile(String filename) {
+        try {
+            File file = new File(filename);
+
+            if (!file.exists()) {
+                System.out.println("❗ File not found: " + filename);
+                return;
+            }
+
+            BufferedImage image = ImageIO.read(file);
+            setBufferedImage(image); // draw the image on canvas
+            System.out.println("✔️ Image loaded from " + filename);
+
+        } catch (IOException e) {
+            System.out.println("❗ Error loading image: " + e.getMessage());
+        }
+    }
+
+    private void saveCommandHistory(String filename) {
+        try (PrintWriter out = new PrintWriter(new FileWriter(filename))) {
+            for (String cmd : commandHistory) {
+                out.println(cmd);
+            }
+            System.out.println("✔️ Commands saved to " + filename);
+        } catch (IOException e) {
+            System.out.println("❗ Error saving commands: " + e.getMessage());
+        }
+    }
+
+    private void loadCommandsFromFile(String filename) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+            String line;
+
+            recordingEnabled = false; // ⛔ Stop saving loaded commands to history
+
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (!line.toLowerCase().startsWith("loadcommands")) {
+                    processCommand(line);
+                } else {
+                    System.out.println("⚠️ Skipped recursive command: " + line);
+                }
+            }
+
+            recordingEnabled = true; // ✅ Resume normal command tracking
+            System.out.println("✔️ Commands loaded from " + filename);
+
+        } catch (IOException e) {
+            System.out.println("❗ Error loading commands: " + e.getMessage());
+            recordingEnabled = true;
+        }
     }
 
     public static void main(String[] args)
@@ -125,19 +133,20 @@ public class Main extends LBUGraphics
         JFrame MainFrame = new JFrame();
         MainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         MainFrame.setLayout(new FlowLayout());
+        setPreferredSize(800, 400);
         MainFrame.add(this);
         MainFrame.pack();
         MainFrame.setVisible(true);
+        MainFrame.setResizable(false);
 
         setTurtleSpeed(2);       // Max speed
         setInternalTurtle(1);    // Minimal visual
         about();
     }
 
-
     @Override
     public void about() {
-        super.about(); // Call the original about
+        //super.about(); // Call the original about
         displayMessage("Project by ChromeDynamo"); // Add your name here
     }
     @Override
@@ -151,6 +160,10 @@ public class Main extends LBUGraphics
         String mainCmd = parts[0];
 
         try {
+            if (recordingEnabled) {
+                commandHistory.add(command.trim());
+            }
+
             switch (mainCmd) {
                 case "about":
                     about();
@@ -259,29 +272,8 @@ public class Main extends LBUGraphics
 
                 case "triangle":
                     if (parts.length < 2) {
-                        System.out.println("❗ Missing parameters for 'triangle'");
-                    } else if (parts[1].contains(",")) {
-                        // Assume format is: triangle a,b,c
-                        try {
-                            String[] sides = parts[1].split(",");
-                            if (sides.length != 3) {
-                                System.out.println("❗ Usage: triangle <a>,<b>,<c>");
-                            } else {
-                                int a = Integer.parseInt(sides[0]);
-                                int b = Integer.parseInt(sides[1]);
-                                int c = Integer.parseInt(sides[2]);
-
-                                if (isDrawableTriangle(a, b, c)) {
-                                    drawCustomTriangle(a, b, c);
-                                } else {
-                                    System.out.println("❗ Invalid triangle sides (fails triangle inequality).");
-                                }
-                            }
-                        } catch (NumberFormatException e) {
-                            System.out.println("❗ 'triangle' with sides must be numeric.");
-                        }
-                    }
-                    else {
+                        System.out.println("❗ Missing side length for 'triangle'");
+                    } else {
                         try {
                             int side = Integer.parseInt(parts[1]);
                             if (side <= 0) {
@@ -290,10 +282,27 @@ public class Main extends LBUGraphics
                                 drawEquilateralTriangle(side);
                             }
                         } catch (NumberFormatException e) {
-                            System.out.println("❗ 'triangle' requires a numeric side length or three comma-separated values.");
+                            System.out.println("❗ 'triangle' requires a numeric side length.");
                         }
                     }
+                    break;
 
+                case "circle":
+                    if (parts.length < 2) {
+                        System.out.println("❗ Missing radius for 'circle'");
+                    } else {
+                        try {
+                            int radius = Integer.parseInt(parts[1]);
+                            if (radius <= 0) {
+                                System.out.println("❗ Radius must be positive.");
+                            } else {
+                                circle(radius); // turtle draws a circle at current position
+                                System.out.println("✔️ Drew circle with radius " + radius);
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("❗ 'circle' requires a numeric radius.");
+                        }
+                    }
                     break;
 
 
@@ -341,6 +350,55 @@ public class Main extends LBUGraphics
                     }
                     break;
 
+                case "saveimage":
+                    if (parts.length < 2) {
+                        System.out.println("❗ Please specify a filename, e.g. saveimage myfile.png");
+                    } else {
+                        saveImageToFile(parts[1]);
+                    }
+                    break;
+
+                case "loadimage":
+                    if (parts.length < 2) {
+                        System.out.println("❗ Please provide the filename, e.g. loadimage mydrawing.png");
+                    } else {
+                        loadImageFromFile(parts[1]);
+                    }
+                    break;
+
+                case "savecommands":
+                    if (parts.length < 2) {
+                        System.out.println("❗ Please provide a filename, e.g. savecommands history.txt");
+                    } else {
+                        saveCommandHistory(parts[1]);
+                    }
+                    break;
+
+                case "loadcommands":
+                    if (parts.length < 2) {
+                        System.out.println("❗ Please provide the filename, e.g. loadcommands commands.txt");
+                    } else {
+                        loadCommandsFromFile(parts[1]);
+                    }
+                    break;
+
+                case "help":
+                    System.out.println("📋 Available Commands:");
+                    System.out.println("move <pixels>, reverse <pixels>");
+                    System.out.println("left <deg>, right <deg>");
+                    System.out.println("penup, pendown, penwidth <px>, pencolour r,g,b");
+                    System.out.println("reset, clear");
+                    System.out.println("square <length>, triangle <length>, circle <radius>");
+                    System.out.println("red, green, black, white");
+                    System.out.println("saveimage <file>, loadimage <file>");
+                    System.out.println("savecommands <file>, loadcommands <file>");
+                    System.out.println("help, exit");
+                    break;
+
+                case "exit":
+                    System.out.println("👋 Exiting program. Goodbye!");
+                    System.exit(0);
+                    break;
 
                 default:
                     System.out.println("❌ Unknown command: '" + command + "'");

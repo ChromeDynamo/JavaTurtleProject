@@ -1,0 +1,10 @@
+pendown
+white
+square 100
+pencolour 100,0,100
+triangle 100
+savecommands demo.txt
+clear
+savecommands demo.txt
+loadcommands demo.txt
+loadcommands demo.txt
