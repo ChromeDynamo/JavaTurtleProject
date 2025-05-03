@@ -18,7 +18,7 @@ import javax.swing.*;
 public class Main extends LBUGraphics
 {
     private boolean recordingEnabled = true;
-
+    private JTextField commandInput;
     private List<String> commandHistory = new ArrayList<>();
 
     private void drawSquare(int side) {
@@ -156,42 +156,62 @@ public class Main extends LBUGraphics
         canvasPanel.setBorder(BorderFactory.createTitledBorder("Canvas"));
         canvasPanel.add(this);
 
-        // 📌 Left panel (help)
-        JTextArea helpArea = new JTextArea(30, 20);
-        helpArea.setEditable(false);
-        JScrollPane helpScroll = new JScrollPane(helpArea);
+        // 📌 Left panel (help) with JTable instead of JTextArea
+        String[][] helpData = {
+                {"Command", "Description"},
+                {"move <pixels>", "Move forward"},
+                {"reverse <pixels>", "Move backward"},
+                {"left <deg>", "Turn left"},
+                {"right <deg>", "Turn right"},
+                {"penup", "Lift pen (no drawing)"},
+                {"pendown", "Lower pen (draw)"},
+                {"penwidth <px>", "Set pen width"},
+                {"pencolour r,g,b", "Set pen RGB colour"},
+                {"reset", "Reset position"},
+                {"clear", "Clear canvas"},
+                {"square <length>", "Draw square"},
+                {"triangle <length>", "Draw triangle"},
+                {"circle <radius>", "Draw circle"},
+                {"red / green / black / white", "Quick set pen colour"},
+                {"saveimage <file>", "Save canvas to image"},
+                {"loadimage <file>", "Load image to canvas"},
+                {"savecommands <file>", "Save command history"},
+                {"loadcommands <file>", "Load and run commands"},
+                {"help", "Show this help"},
+                {"exit", "Exit program"}
+        };
+
+        String[] columnNames = {"Command", "Description"};
+        JTable helpTable = new JTable(helpData, columnNames);
+        helpTable.setEnabled(false);
+        helpTable.setFillsViewportHeight(true);
+        JScrollPane helpScroll = new JScrollPane(helpTable);
         JPanel leftPanel = new JPanel(new BorderLayout());
+        leftPanel.setBorder(BorderFactory.createTitledBorder("Help"));
         leftPanel.add(helpScroll, BorderLayout.CENTER);
+
 
         // 🧭 Right panel (buttons)
         JPanel rightPanel = new JPanel();
-        rightPanel.setLayout(new GridLayout(0, 2, 5, 5));// vertical buttons
+        rightPanel.setLayout(new GridLayout(0, 2, 5, 5));
 
-        // 🚀 Add buttons for commands
-        String[] commands = {
-                "move 100", "reverse 100",
-                "left 90", "right 90",
+        String[] simpleCommands = {
                 "penup", "pendown",
                 "reset", "clear",
-                "square 100", "triangle 100", "circle 50",
-                "penwidth 3", "pencolour 0,255,0",
                 "red", "green", "black", "white",
                 "saveimage mydrawing.png", "loadimage mydrawing.png",
-                "savecommands mycommands.txt", "loadcommands mycommands.txt",
-                "help", "exit"
+                "savecommands mycommands.txt", "loadcommands mycommands.txt"
         };
 
-
-        for (String cmd : commands) {
+        for (String cmd : simpleCommands) {
             JButton btn = new JButton(cmd.split(" ")[0]);
             btn.addActionListener(e -> {
-                SwingUtilities.invokeLater(() -> processCommand(cmd));
-                if (cmd.startsWith("help")) {
-                    helpArea.setText(getHelpText());
-                }
+                commandInput.setText(cmd);
+                commandInput.postActionEvent();
             });
             rightPanel.add(btn);
         }
+
 
         // 🧱 Add all panels to frame
         MainFrame.add(leftPanel, BorderLayout.WEST);
@@ -203,7 +223,7 @@ public class Main extends LBUGraphics
         MainFrame.setVisible(true);
 
         setTurtleSpeed(2);
-        setInternalTurtle(1);
+        setInternalTurtle(0);
         about();
     }
 
