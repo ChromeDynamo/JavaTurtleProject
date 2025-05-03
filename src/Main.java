@@ -12,7 +12,8 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.BufferedReader;
 import java.io.FileReader;
-
+import java.awt.*;
+import javax.swing.*;
 
 public class Main extends LBUGraphics
 {
@@ -124,25 +125,87 @@ public class Main extends LBUGraphics
         }
     }
 
+    private String getHelpText() {
+        return """
+    📋 Available Commands:
+    move <pixels>, reverse <pixels>
+    left <deg>, right <deg>
+    penup, pendown, penwidth <px>, pencolour r,g,b
+    reset, clear
+    square <length>, triangle <length>, circle <radius>
+    red, green, black, white
+    saveimage <file>, loadimage <file>
+    savecommands <file>, loadcommands <file>
+    help, exit
+    """;
+    }
+
     public static void main(String[] args)
     {
         new Main(); //create instance of class that extends LBUGraphics (could be separate class without main), gets out of static context
     }
 
     public Main() {
-        JFrame MainFrame = new JFrame();
+        JFrame MainFrame = new JFrame("Turtle Drawing");
         MainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        MainFrame.setLayout(new FlowLayout());
-        setPreferredSize(800, 400);
-        MainFrame.add(this);
-        MainFrame.pack();
-        MainFrame.setVisible(true);
-        MainFrame.setResizable(false);
+        MainFrame.setLayout(new BorderLayout());
 
-        setTurtleSpeed(2);       // Max speed
-        setInternalTurtle(1);    // Minimal visual
+        // 🖼️ Canvas area
+        setPreferredSize(new Dimension(800, 400));
+        JPanel canvasPanel = new JPanel(new FlowLayout());
+        canvasPanel.setBorder(BorderFactory.createTitledBorder("Canvas"));
+        canvasPanel.add(this);
+
+        // 📌 Left panel (help)
+        JTextArea helpArea = new JTextArea(30, 20);
+        helpArea.setEditable(false);
+        JScrollPane helpScroll = new JScrollPane(helpArea);
+        JPanel leftPanel = new JPanel(new BorderLayout());
+        leftPanel.add(helpScroll, BorderLayout.CENTER);
+
+        // 🧭 Right panel (buttons)
+        JPanel rightPanel = new JPanel();
+        rightPanel.setLayout(new GridLayout(0, 2, 5, 5));// vertical buttons
+
+        // 🚀 Add buttons for commands
+        String[] commands = {
+                "move 100", "reverse 100",
+                "left 90", "right 90",
+                "penup", "pendown",
+                "reset", "clear",
+                "square 100", "triangle 100", "circle 50",
+                "penwidth 3", "pencolour 0,255,0",
+                "red", "green", "black", "white",
+                "saveimage mydrawing.png", "loadimage mydrawing.png",
+                "savecommands mycommands.txt", "loadcommands mycommands.txt",
+                "help", "exit"
+        };
+
+        for (String cmd : commands) {
+            JButton btn = new JButton(cmd.split(" ")[0]);
+            btn.addActionListener(e -> {
+                SwingUtilities.invokeLater(() -> processCommand(cmd));
+                if (cmd.startsWith("help")) {
+                    helpArea.setText(getHelpText());
+                }
+            });
+            rightPanel.add(btn);
+        }
+
+        // 🧱 Add all panels to frame
+        MainFrame.add(leftPanel, BorderLayout.WEST);
+        MainFrame.add(canvasPanel, BorderLayout.CENTER);
+        MainFrame.add(rightPanel, BorderLayout.EAST);
+
+        MainFrame.pack();
+        MainFrame.setResizable(false);
+        MainFrame.setVisible(true);
+
+        setTurtleSpeed(2);
+        setInternalTurtle(1);
         about();
     }
+
 
     @Override
     public void about() {
