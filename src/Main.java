@@ -181,6 +181,7 @@ public class Main extends LBUGraphics
                 "help", "exit"
         };
 
+
         for (String cmd : commands) {
             JButton btn = new JButton(cmd.split(" ")[0]);
             btn.addActionListener(e -> {
