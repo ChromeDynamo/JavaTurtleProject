@@ -1,1 +1,7 @@
-loadcommands mycommands.txt
+loadimage mydrawing.png
+pendown
+green
+square 150
+pencolour 125,50,125
+triangle 150
+savecommands mycommands.txt

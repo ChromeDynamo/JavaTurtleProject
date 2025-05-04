@@ -6,6 +6,7 @@ import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.FileWriter;
@@ -14,11 +15,13 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 public class Main extends LBUGraphics
 {
     private boolean recordingEnabled = true;
     private List<String> commandHistory = new ArrayList<>();
+
 
     private void drawSquare(int side) {
         int originalX = getxPos();
@@ -102,17 +105,30 @@ public class Main extends LBUGraphics
 
     private void loadCommandsFromFile(String filename) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+            List<String> commandsToExecute = new ArrayList<>();
             String line;
 
             recordingEnabled = false; // ⛔ Stop saving loaded commands to history
 
+            // Read all commands into a list
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
-                if (!line.toLowerCase().startsWith("loadcommands")) {
-                    processCommand(line);
-                } else {
-                    System.out.println("⚠️ Skipped recursive command: " + line);
+                if (!line.isEmpty()) {
+                    commandsToExecute.add(line);
                 }
+            }
+
+            // Remove the last command if it is "savecommands"
+            if (!commandsToExecute.isEmpty()) {
+                String lastCommand = commandsToExecute.get(commandsToExecute.size() - 1).toLowerCase();
+                if (lastCommand.startsWith("savecommands")) {
+                    commandsToExecute.remove(commandsToExecute.size() - 1);
+                }
+            }
+
+            // Execute the remaining commands
+            for (String command : commandsToExecute) {
+                processCommand(command); // Execute each command
             }
 
             recordingEnabled = true; // ✅ Resume normal command tracking
@@ -223,27 +239,57 @@ public class Main extends LBUGraphics
             btn.addActionListener(e -> processCommand(cmd)); // 🔥 Directly process the command
             rightPanel.add(btn);
         }
-
-
-
         // 🧱 Add all panels to frame
         MainFrame.add(leftPanel, BorderLayout.WEST);
         MainFrame.add(canvasPanel, BorderLayout.CENTER);
         MainFrame.add(rightPanel, BorderLayout.EAST);
 
-        // 📂 File List Panel
-        fileList = new JList<>();
-        JScrollPane fileScroll = new JScrollPane(fileList);
-        fileScroll.setBorder(BorderFactory.createTitledBorder("Files in Directory"));
-
+        // Add the bottom panel
         JPanel bottomPanel = new JPanel(new BorderLayout());
-        bottomPanel.add(fileScroll, BorderLayout.CENTER);
+        bottomPanel.setBorder(BorderFactory.createTitledBorder("File Table"));
 
-// Add bottom panel to frame
+        // Define table column names
+        String[] bottomColumnNames = {"Commands (txt files)", "PNG Images", "JPG Images"};
+        DefaultTableModel bottomTableModel = new DefaultTableModel(bottomColumnNames, 0);
+
+        // Scan the root directory for files
+        File rootDirectory = new File("./");
+
+        String[] commands = rootDirectory.list((dir, name) -> name.endsWith(".txt"));
+        String[] pngImages = rootDirectory.list((dir, name) -> name.endsWith(".png"));
+        String[] jpgImages = rootDirectory.list((dir, name) -> name.endsWith(".jpg"));
+
+        // Find the maximum row count
+        int maxRows = Math.max(commands != null ? commands.length : 0,
+                Math.max(pngImages != null ? pngImages.length : 0,
+                        jpgImages != null ? jpgImages.length : 0));
+
+        // Populate the table model
+        for (int i = 0; i < maxRows; i++) {
+            String commandFile = (commands != null && i < commands.length) ? commands[i] : "";
+            String pngFile = (pngImages != null && i < pngImages.length) ? pngImages[i] : "";
+            String jpgFile = (jpgImages != null && i < jpgImages.length) ? jpgImages[i] : "";
+            bottomTableModel.addRow(new Object[]{commandFile, pngFile, jpgFile});
+        }
+
+        // Create the JTable
+        JTable bottomTable = new JTable(bottomTableModel);
+        bottomTable.setEnabled(false);
+        bottomTable.setFillsViewportHeight(true);
+
+        // Dynamically calculate the height of the table based on the number of rows
+        int rowHeight = bottomTable.getRowHeight();
+        int tableHeight = (maxRows * rowHeight) + 50; // Add 100 pixels for padding
+
+        // Set preferred and maximum size for the scroll pane
+        JScrollPane bottomScroll = new JScrollPane(bottomTable);
+        bottomScroll.setPreferredSize(new Dimension(bottomScroll.getPreferredSize().width, tableHeight));
+        bottomScroll.setMaximumSize(new Dimension(bottomScroll.getMaximumSize().width, tableHeight));
+
+        bottomPanel.add(bottomScroll, BorderLayout.CENTER);
+
+        // Add the bottom panel to the main frame
         MainFrame.add(bottomPanel, BorderLayout.SOUTH);
-
-// Populate files now
-        populateFileList();
 
         MainFrame.pack();
         MainFrame.setResizable(false);
@@ -253,7 +299,6 @@ public class Main extends LBUGraphics
         setInternalTurtle(0);
         about();
     }
-
 
     @Override
     public void about() {
