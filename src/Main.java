@@ -18,7 +18,6 @@ import javax.swing.*;
 public class Main extends LBUGraphics
 {
     private boolean recordingEnabled = true;
-    private JTextField commandInput;
     private List<String> commandHistory = new ArrayList<>();
 
     private void drawSquare(int side) {
@@ -145,6 +144,23 @@ public class Main extends LBUGraphics
         new Main(); //create instance of class that extends LBUGraphics (could be separate class without main), gets out of static context
     }
 
+    private JList<String> fileList;
+
+    private void populateFileList() {
+        File dir = new File(".");
+        File[] files = dir.listFiles((d, name) -> name.endsWith(".png") || name.endsWith(".jpg") || name.endsWith(".txt"));
+
+        DefaultListModel<String> model = new DefaultListModel<>();
+
+        if (files != null) {
+            for (File file : files) {
+                model.addElement(file.getName());
+            }
+        }
+
+        fileList.setModel(model);
+    }
+
     public Main() {
         JFrame MainFrame = new JFrame("Turtle Drawing");
         MainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -190,7 +206,6 @@ public class Main extends LBUGraphics
         leftPanel.setBorder(BorderFactory.createTitledBorder("Help"));
         leftPanel.add(helpScroll, BorderLayout.CENTER);
 
-
         // 🧭 Right panel (buttons)
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new GridLayout(0, 2, 5, 5));
@@ -200,23 +215,35 @@ public class Main extends LBUGraphics
                 "reset", "clear",
                 "red", "green", "black", "white",
                 "saveimage mydrawing.png", "loadimage mydrawing.png",
-                "savecommands mycommands.txt", "loadcommands mycommands.txt"
+                "savecommands mycommands.txt"
         };
 
         for (String cmd : simpleCommands) {
             JButton btn = new JButton(cmd.split(" ")[0]);
-            btn.addActionListener(e -> {
-                commandInput.setText(cmd);
-                commandInput.postActionEvent();
-            });
+            btn.addActionListener(e -> processCommand(cmd)); // 🔥 Directly process the command
             rightPanel.add(btn);
         }
+
 
 
         // 🧱 Add all panels to frame
         MainFrame.add(leftPanel, BorderLayout.WEST);
         MainFrame.add(canvasPanel, BorderLayout.CENTER);
         MainFrame.add(rightPanel, BorderLayout.EAST);
+
+        // 📂 File List Panel
+        fileList = new JList<>();
+        JScrollPane fileScroll = new JScrollPane(fileList);
+        fileScroll.setBorder(BorderFactory.createTitledBorder("Files in Directory"));
+
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.add(fileScroll, BorderLayout.CENTER);
+
+// Add bottom panel to frame
+        MainFrame.add(bottomPanel, BorderLayout.SOUTH);
+
+// Populate files now
+        populateFileList();
 
         MainFrame.pack();
         MainFrame.setResizable(false);
