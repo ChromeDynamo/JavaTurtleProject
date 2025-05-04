@@ -1,7 +1,19 @@
-loadimage mydrawing.png
 pendown
-green
-square 150
-pencolour 125,50,125
-triangle 150
+move 100
+left 90
+pencolour 255,0,125
+triangle 100
+pencoloud 0,255,125
+square 75
+pencolour 0,255,125
+square 80
+pencoloud 214,43,123
+pencolour 214,43,124
+penup
+move -100
+right 180
+pendown
+circle 100
+saveimage mydrawing.png
+clear
 savecommands mycommands.txt

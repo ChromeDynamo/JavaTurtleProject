@@ -1,7 +1,6 @@
 import java.awt.Color;
 import java.awt.FlowLayout;
 import javax.swing.JFrame;
-import uk.ac.leedsbeckett.oop.LBUGraphics;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
@@ -17,27 +16,10 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
-public class Main extends LBUGraphics
+public class Main extends TurtleGraphics
 {
     private boolean recordingEnabled = true;
     private List<String> commandHistory = new ArrayList<>();
-
-
-    private void drawSquare(int side) {
-        int originalX = getxPos();
-        int originalY = getyPos();
-        int originalAngle = getDirection();
-
-        for (int i = 0; i < 4; i++) {
-            forward(side);
-            right(90);
-        }
-
-        // Return to original state
-        setxPos(originalX);
-        setyPos(originalY);
-        pointTurtle(originalAngle);
-    }
 
     private void drawEquilateralTriangle(int side) {
         int originalX = getxPos();
@@ -128,7 +110,11 @@ public class Main extends LBUGraphics
 
             // Execute the remaining commands
             for (String command : commandsToExecute) {
-                processCommand(command); // Execute each command
+                try {
+                    processCommand(command); // Execute each command
+                } catch (Exception e) {
+                    System.out.println("❗ Error processing command '" + command + "': " + e.getMessage());
+                }
             }
 
             recordingEnabled = true; // ✅ Resume normal command tracking
@@ -160,7 +146,7 @@ public class Main extends LBUGraphics
         new Main(); //create instance of class that extends LBUGraphics (could be separate class without main), gets out of static context
     }
 
-    private JList<String> fileList;
+    private JList<String> fileList = new JList<>();
 
     private void populateFileList() {
         File dir = new File(".");
@@ -178,6 +164,7 @@ public class Main extends LBUGraphics
     }
 
     public Main() {
+        recordingEnabled = true;
         JFrame MainFrame = new JFrame("Turtle Drawing");
         MainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         MainFrame.setLayout(new BorderLayout());
@@ -297,6 +284,7 @@ public class Main extends LBUGraphics
 
         setTurtleSpeed(2);
         setInternalTurtle(0);
+        populateFileList();
         about();
     }
 
@@ -489,9 +477,9 @@ public class Main extends LBUGraphics
                             if (rgbParts.length != 3) {
                                 System.out.println("❗ 'pencolour' needs 3 values separated by commas, like pencolour 255,0,0");
                             } else {
-                                int r = Integer.parseInt(rgbParts[0]);
-                                int g = Integer.parseInt(rgbParts[1]);
-                                int b = Integer.parseInt(rgbParts[2]);
+                                int r = Integer.parseInt(rgbParts[0].trim());
+                                int g = Integer.parseInt(rgbParts[1].trim());
+                                int b = Integer.parseInt(rgbParts[2].trim());
 
                                 if (isValidColorValue(r) && isValidColorValue(g) && isValidColorValue(b)) {
                                     setPenColour(new Color(r, g, b));
