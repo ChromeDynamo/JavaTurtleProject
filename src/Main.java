@@ -21,8 +21,6 @@ public class Main extends TurtleGraphics
     private boolean recordingEnabled = true;
     private List<String> commandHistory = new ArrayList<>();
 
-
-
     private String getHelpText() {
         return """
     📋 Available Commands:
