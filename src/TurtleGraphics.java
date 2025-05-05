@@ -9,8 +9,8 @@ import java.util.List;
  * TurtleGraphics class extending LBUGraphics to add turtle-specific drawing functionalities.
  */
 public class TurtleGraphics extends LBUGraphics {
-    private boolean recordingEnabled = true;
-    private List<String> commandHistory = new ArrayList<>();
+    public boolean recordingEnabled = true;
+    public final List<String> commandHistory = new ArrayList<>();
 
     public TurtleGraphics() {
         super();

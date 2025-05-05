@@ -1,51 +1,23 @@
 import java.awt.Color;
 import java.awt.FlowLayout;
 import javax.swing.JFrame;
-import javax.imageio.ImageIO;
 import java.io.File;
-import java.io.IOException;
-import java.awt.image.BufferedImage;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.List;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 public class Main extends TurtleGraphics
 {
-    private boolean recordingEnabled = true;
-    private List<String> commandHistory = new ArrayList<>();
-
-    private String getHelpText() {
-        return """
-    📋 Available Commands:
-    move <pixels>, reverse <pixels>
-    left <deg>, right <deg>
-    penup, pendown, penwidth <px>, pencolour r,g,b
-    reset, clear
-    square <length>, triangle <length>, circle <radius>
-    red, green, black, white
-    saveimage <file>, loadimage <file>
-    savecommands <file>, loadcommands <file>
-    help, exit
-    """;
-    }
-
     public static void main(String[] args)
     {
         new Main(); //create instance of class that extends LBUGraphics (could be separate class without main), gets out of static context
     }
 
-    private JList<String> fileList = new JList<>();
+    private final JList<String> fileList = new JList<>();
 
     private void populateFileList() {
         File dir = new File(".");
-        File[] files = dir.listFiles((d, name) -> name.endsWith(".png") || name.endsWith(".jpg") || name.endsWith(".txt"));
+        File[] files = dir.listFiles((_, name) -> name.endsWith(".png") || name.endsWith(".jpg") || name.endsWith(".txt"));
 
         DefaultListModel<String> model = new DefaultListModel<>();
 
@@ -118,7 +90,7 @@ public class Main extends TurtleGraphics
 
         for (String cmd : simpleCommands) {
             JButton btn = new JButton(cmd.split(" ")[0]);
-            btn.addActionListener(e -> processCommand(cmd)); // 🔥 Directly process the command
+            btn.addActionListener(_ -> processCommand(cmd)); // 🔥 Directly process the command
             rightPanel.add(btn);
         }
         // 🧱 Add all panels to frame
@@ -137,9 +109,9 @@ public class Main extends TurtleGraphics
         // Scan the root directory for files
         File rootDirectory = new File("./");
 
-        String[] commands = rootDirectory.list((dir, name) -> name.endsWith(".txt"));
-        String[] pngImages = rootDirectory.list((dir, name) -> name.endsWith(".png"));
-        String[] jpgImages = rootDirectory.list((dir, name) -> name.endsWith(".jpg"));
+        String[] commands = rootDirectory.list((_, name) -> name.endsWith(".txt"));
+        String[] pngImages = rootDirectory.list((_, name) -> name.endsWith(".png"));
+        String[] jpgImages = rootDirectory.list((_, name) -> name.endsWith(".jpg"));
 
         // Find the maximum row count
         int maxRows = Math.max(commands != null ? commands.length : 0,
@@ -163,12 +135,7 @@ public class Main extends TurtleGraphics
         int rowHeight = bottomTable.getRowHeight();
         int tableHeight = (maxRows * rowHeight) + 50; // Add 100 pixels for padding
 
-        // Set preferred and maximum size for the scroll pane
-        JScrollPane bottomScroll = new JScrollPane(bottomTable);
-        bottomScroll.setPreferredSize(new Dimension(bottomScroll.getPreferredSize().width, tableHeight));
-        bottomScroll.setMaximumSize(new Dimension(bottomScroll.getMaximumSize().width, tableHeight));
-
-        bottomPanel.add(bottomScroll, BorderLayout.CENTER);
+        bottomPanel.add(createBottomScroll(bottomTable, tableHeight), BorderLayout.CENTER);
 
         // Add the bottom panel to the main frame
         MainFrame.add(bottomPanel, BorderLayout.SOUTH);
@@ -181,6 +148,13 @@ public class Main extends TurtleGraphics
         setInternalTurtle(0);
         populateFileList();
         about();
+    }
+
+    private JScrollPane createBottomScroll(JTable bottomTable, int tableHeight) {
+        JScrollPane bottomScroll = new JScrollPane(bottomTable);
+        bottomScroll.setPreferredSize(new Dimension(bottomScroll.getPreferredSize().width, tableHeight));
+        bottomScroll.setMaximumSize(new Dimension(bottomScroll.getMaximumSize().width, tableHeight));
+        return bottomScroll;
     }
 
     @Override
