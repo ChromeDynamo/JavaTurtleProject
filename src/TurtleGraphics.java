@@ -171,6 +171,42 @@ public class TurtleGraphics extends LBUGraphics {
         System.out.println("✔️ Drew a polygon with " + sides + " sides of length " + length);
     }
 
+    public void drawTriangle(int side1, int side2, int side3) {
+        // Validate the triangle inequality theorem
+        if (side1 + side2 <= side3 || side1 + side3 <= side2 || side2 + side3 <= side1) {
+            System.out.println("❌ Invalid triangle dimensions. The sum of any two sides must be greater than the third side.");
+            return;
+        }
+
+        int originalX = getxPos();
+        int originalY = getyPos();
+        int originalAngle = getDirection();
+
+        // Calculate internal angles using the law of cosines
+        double angleA = Math.toDegrees(Math.acos((Math.pow(side2, 2) + Math.pow(side3, 2) - Math.pow(side1, 2)) / (2.0 * side2 * side3)));
+        double angleB = Math.toDegrees(Math.acos((Math.pow(side1, 2) + Math.pow(side3, 2) - Math.pow(side2, 2)) / (2.0 * side1 * side3)));
+        double angleC = 180 - (angleA + angleB); // Third angle ensures the sum is 180
+
+        // Calculate external angles
+        double externalAngleA = 180 - angleA;
+        double externalAngleB = 180 - angleB;
+        double externalAngleC = 180 - angleC;
+
+        // Draw the triangle
+        forward(side1);            // Draw the first side
+        right((int) externalAngleB); // Turn to align with the second side
+        forward(side2);            // Draw the second side
+        right((int) externalAngleA); // Turn to align with the third side
+        forward(side3);            // Draw the third side
+
+        // Restore turtle's original position and orientation
+        setxPos(originalX);
+        setyPos(originalY);
+        pointTurtle(originalAngle);
+
+        System.out.println("✅ Successfully drew a triangle with sides " + side1 + ", " + side2 + ", and " + side3);
+    }
+
     @Override
     public void about() {
         super.about();

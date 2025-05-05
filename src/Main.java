@@ -288,17 +288,28 @@ public class Main extends TurtleGraphics
 
                 case "triangle":
                     if (parts.length < 2) {
-                        System.out.println("❗ Missing side length for 'triangle'");
+                        System.out.println("❗ Missing parameters for 'triangle'. Usage: triangle <side1>,<side2>,<side3>");
                     } else {
                         try {
-                            int side = Integer.parseInt(parts[1]);
-                            if (side <= 0) {
-                                System.out.println("❗ Side length must be positive.");
+                            // Split the second part (parameters) by commas
+                            String[] sides = parts[1].split(",");
+                            if (sides.length != 3) {
+                                System.out.println("❗ Missing parameters for 'triangle'. Usage: triangle <side1>,<side2>,<side3>");
                             } else {
-                                drawEquilateralTriangle(side);
+                                // Parse each side
+                                int side1 = Integer.parseInt(sides[0].trim());
+                                int side2 = Integer.parseInt(sides[1].trim());
+                                int side3 = Integer.parseInt(sides[2].trim());
+
+                                // Validate that all sides are positive
+                                if (side1 <= 0 || side2 <= 0 || side3 <= 0) {
+                                    System.out.println("❗ Side lengths must be positive integers.");
+                                } else {
+                                    drawTriangle(side1, side2, side3);
+                                }
                             }
                         } catch (NumberFormatException e) {
-                            System.out.println("❗ 'triangle' requires a numeric side length.");
+                            System.out.println("❗ 'triangle' requires numeric side lengths.");
                         }
                     }
                     break;
