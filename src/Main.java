@@ -32,9 +32,62 @@ public class Main extends TurtleGraphics
 
     public Main() {
         recordingEnabled = true;
+
         JFrame MainFrame = new JFrame("Turtle Drawing");
         MainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         MainFrame.setLayout(new BorderLayout());
+
+// Adding a MenuBar
+        JMenuBar menuBar = new JMenuBar();
+
+// File Menu
+        JMenu fileMenu = new JMenu("File");
+
+        // New Option
+        JMenuItem newItem = new JMenuItem("New");
+        newItem.addActionListener(e -> {
+            processCommand("clear"); // Clear the canvas
+            processCommand("reset"); // Reset the turtle to the center
+        });
+        fileMenu.add(newItem);
+
+        // Save Option
+        JMenuItem saveItem = new JMenuItem("Save");
+        saveItem.addActionListener(e -> processCommand("saveimage savedimage.png")); // Save the current image
+        fileMenu.add(saveItem);
+
+        // Exit Option
+        JMenuItem exitItem = new JMenuItem("Exit");
+        exitItem.addActionListener(e -> System.exit(0)); // Exit application
+        fileMenu.addSeparator();
+        fileMenu.add(exitItem);
+
+        menuBar.add(fileMenu);
+
+        // Edit Menu
+        JMenu editMenu = new JMenu("Edit");
+
+        // Clear Option
+        JMenuItem clearItem = new JMenuItem("Clear");
+        clearItem.addActionListener(e -> processCommand("clear")); // Clear canvas
+        editMenu.add(clearItem);
+
+        // Reset Option
+        JMenuItem resetItem = new JMenuItem("Reset");
+        resetItem.addActionListener(e -> processCommand("reset")); // Reset turtle
+        editMenu.add(resetItem);
+
+        menuBar.add(editMenu);
+
+// Help Menu
+        JMenu helpMenu = new JMenu("Help");
+        JMenuItem aboutItem = new JMenuItem("Command List");
+        aboutItem.addActionListener(e -> processCommand("help")); // Show about
+        helpMenu.add(aboutItem);
+        menuBar.add(helpMenu);
+
+// Setting the menu bar
+        MainFrame.setJMenuBar(menuBar);
 
         // 🖼️ Canvas area
         setPreferredSize(new Dimension(800, 400));

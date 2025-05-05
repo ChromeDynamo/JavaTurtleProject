@@ -178,35 +178,44 @@ public class TurtleGraphics extends LBUGraphics {
             return;
         }
 
-        int originalX = getxPos();
-        int originalY = getyPos();
-        int originalAngle = getDirection();
+        // Calculate angles using the law of cosines
+        double sideA = (double) side1;
+        double sideB = (double) side2;
+        double sideC = (double) side3;
 
-        // Calculate internal angles using the law of cosines
-        double angleA = Math.toDegrees(Math.acos((Math.pow(side2, 2) + Math.pow(side3, 2) - Math.pow(side1, 2)) / (2.0 * side2 * side3)));
-        double angleB = Math.toDegrees(Math.acos((Math.pow(side1, 2) + Math.pow(side3, 2) - Math.pow(side2, 2)) / (2.0 * side1 * side3)));
-        double angleC = 180 - (angleA + angleB); // Third angle ensures the sum is 180
+        double cosAngleA = (sideB * sideB + sideC * sideC - sideA * sideA) / (2 * sideB * sideC);
+        double cosAngleB = (sideA * sideA + sideC * sideC - sideB * sideB) / (2 * sideA * sideC);
+        double cosAngleC = (sideA * sideA + sideB * sideB - sideC * sideC) / (2 * sideA * sideB);
 
-        // Calculate external angles
-        double externalAngleA = 180 - angleA;
-        double externalAngleB = 180 - angleB;
-        double externalAngleC = 180 - angleC;
+        double angleA = Math.toDegrees(Math.acos(cosAngleA));
+        double angleB = Math.toDegrees(Math.acos(cosAngleB));
+        double angleC = Math.toDegrees(Math.acos(cosAngleC));
+
+        int angleAInt = (int) angleA;
+        int angleBInt = (int) angleB;
+        int angleCInt = (int) angleC;
+
+        int turn1 = 180 - angleAInt;
+        int turn2 = 180 - angleBInt;
+        int turn3 = 180 - angleCInt;
 
         // Draw the triangle
-        forward(side1);            // Draw the first side
-        right((int) externalAngleB); // Turn to align with the second side
-        forward(side2);            // Draw the second side
-        right((int) externalAngleA); // Turn to align with the third side
-        forward(side3);            // Draw the third side
+        drawOff();                // Turn off drawing temporarily
+        forward(100);             // Move to an initial starting point
+        left(90);                 // Align turtle to start drawing
+        drawOn();                 // Turn on drawing
 
-        // Restore turtle's original position and orientation
-        setxPos(originalX);
-        setyPos(originalY);
-        pointTurtle(originalAngle);
+        forward(side3);           // Draw the first side
+        left(turn2);              // Turn to align with the second side
+        forward(side1);           // Draw the second side
+        left(turn3);              // Turn to align with the third side
+        forward(side2);           // Draw the third side
+
+        drawOff();                // Turn off drawing to reset position
+        reset();                  // Reset turtle to the original position
 
         System.out.println("✅ Successfully drew a triangle with sides " + side1 + ", " + side2 + ", and " + side3);
     }
-
     @Override
     public void about() {
         super.about();
