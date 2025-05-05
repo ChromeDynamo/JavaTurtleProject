@@ -56,6 +56,11 @@ public class Main extends TurtleGraphics
         saveItem.addActionListener(e -> processCommand("saveimage savedimage.png")); // Save the current image
         fileMenu.add(saveItem);
 
+        // Load Option
+        JMenuItem loadItem = new JMenuItem("Load");
+        loadItem.addActionListener(e -> processCommand("loadimage savedimage.png")); // Load the saved image
+        fileMenu.add(loadItem);
+
         // Exit Option
         JMenuItem exitItem = new JMenuItem("Exit");
         exitItem.addActionListener(e -> System.exit(0)); // Exit application
