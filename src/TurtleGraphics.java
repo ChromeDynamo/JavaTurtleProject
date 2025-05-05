@@ -4,6 +4,9 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane; // For the confirmation dialog
+import java.io.File; // For file operations
+import java.io.IOException; // For handling IO exceptions
 
 /**
  * TurtleGraphics class extending LBUGraphics to add turtle-specific drawing functionalities.
@@ -69,19 +72,34 @@ public class TurtleGraphics extends LBUGraphics {
 
     public void loadImageFromFile(String filename) {
         try {
-            File file = new File(filename);
+            // Check if there are unsaved changes
+            int response = JOptionPane.showConfirmDialog(null,
+                    "You have unsaved changes. Would you like to save them before loading a new image?",
+                    "Unsaved Changes",
+                    JOptionPane.YES_NO_CANCEL_OPTION,
+                    JOptionPane.WARNING_MESSAGE);
 
+            if (response == JOptionPane.CANCEL_OPTION) {
+                System.out.println("Load operation canceled.");
+                return; // Cancel operation
+            } else if (response == JOptionPane.YES_OPTION) {
+                // Call save method (or prompt user to specify save location)
+                saveImageToFile("default_save.png"); // Example: Save with a default filename
+            }
+
+            // Proceed with loading the new image
+            File file = new File(filename);
             if (!file.exists()) {
-                System.out.println("❗ File not found: " + filename);
+                System.out.println("⚠ File not found: " + filename);
                 return;
             }
 
             BufferedImage image = ImageIO.read(file);
-            setBufferedImage(image); // draw the image on canvas
-            System.out.println("✔️ Image loaded from " + filename);
+            setBufferedImage(image); // Draw the image on canvas
+            System.out.println("✔ Image loaded from " + filename);
 
         } catch (IOException e) {
-            System.out.println("❗ Error loading image: " + e.getMessage());
+            System.out.println("⚠ Error loading image: " + e.getMessage());
         }
     }
 
@@ -161,7 +179,6 @@ public class TurtleGraphics extends LBUGraphics {
 
     @Override
     public void processCommand(String command) {
-        // Process commands here...
-        // You can extend this to include logic for new commands, e.g., "polygon <sides> <length>"
+        // No implementation needed
     }
 }

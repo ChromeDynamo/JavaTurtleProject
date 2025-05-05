@@ -243,7 +243,10 @@ public class Main extends TurtleGraphics
                     break;
 
                 case "reset":
-                    reset();
+                    reset(); // Reset position and orientation
+                    setPenColour(Color.RED); // Reset pen color to default (black)
+                    setStroke(1); // Reset pen width to default (1)
+                    System.out.println("Reset: Position, orientation, pen color, and pen width.");
                     break;
 
                 case "clear":
