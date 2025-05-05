@@ -290,7 +290,7 @@ public class Main extends TurtleGraphics
 
     @Override
     public void about() {
-        //super.about(); // Call the original about
+        super.about(); // Call the original about
         displayMessage("Project by ChromeDynamo"); // Add your name here
     }
     @Override
@@ -523,6 +523,24 @@ public class Main extends TurtleGraphics
                         System.out.println("❗ Please provide the filename, e.g. loadcommands commands.txt");
                     } else {
                         loadCommandsFromFile(parts[1]);
+                    }
+                    break;
+
+                case "speed":
+                    if (parts.length < 2) {
+                        System.out.println("❗ Missing value for 'speed'");
+                    } else {
+                        try {
+                            int speed = Integer.parseInt(parts[1]);
+                            if (speed >= 1 && speed <= 10) {
+                                setTurtleSpeed(speed);
+                                System.out.println("✅ Turtle speed set to " + speed);
+                            } else {
+                                System.out.println("❗ Speed must be between 1 and 10.");
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("❗ 'speed' requires a numeric value between 1 and 10.");
+                        }
                     }
                     break;
 
