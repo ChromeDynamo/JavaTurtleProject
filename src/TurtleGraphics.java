@@ -20,6 +20,17 @@ public class TurtleGraphics extends LBUGraphics {
         System.out.println("TurtleGraphics initialized!");
     }
 
+    public void moveWithBounds(int distance) {
+        int newX = getxPos() + (int) (distance * Math.cos(Math.toRadians(getDirection())));
+        int newY = getyPos() + (int) (distance * Math.sin(Math.toRadians(getDirection())));
+
+        if (newX < 0 || newX > 800 || newY < 0 || newY > 400) { // Assuming screen size is 800x400
+            System.out.println("❗ Can't move. Movement would take the turtle out of bounds.");
+        } else {
+            forward(distance);
+        }
+    }
+
     public void drawSquare(int side) {
         int originalX = getxPos();
         int originalY = getyPos();

@@ -220,7 +220,6 @@ public class Main extends TurtleGraphics
         super.about(); // Call the original about
         displayMessage("Project by ChromeDynamo");
     }
-
     @Override
     public void processCommand(String command) {
         if (command == null || command.trim().isEmpty()) {
@@ -251,7 +250,7 @@ public class Main extends TurtleGraphics
 
                 case "left":
                     if (parts.length < 2) {
-                        left(90);
+                        System.out.println("❗ Missing angle for 'left'");
                     } else {
                         try {
                             int angle = Integer.parseInt(parts[1]);
@@ -264,7 +263,7 @@ public class Main extends TurtleGraphics
 
                 case "right":
                     if (parts.length < 2) {
-                        right(90);
+                        System.out.println("❗ Missing angle for 'right'");
                     } else {
                         try {
                             int angle = Integer.parseInt(parts[1]);
@@ -277,11 +276,11 @@ public class Main extends TurtleGraphics
 
                 case "move":
                     if (parts.length < 2) {
-                        forward(100);
+                        System.out.println("❗ Missing distance for 'move'");
                     } else {
                         try {
                             int dist = Integer.parseInt(parts[1]);
-                            forward(dist);
+                            moveWithBounds(dist);
                         } catch (NumberFormatException e) {
                             System.out.println("❗ 'move' requires a numeric distance.");
                         }
@@ -290,11 +289,11 @@ public class Main extends TurtleGraphics
 
                 case "reverse":
                     if (parts.length < 2) {
-                        forward(-100);
+                        System.out.println("❗ Missing distance for 'reverse'");
                     } else {
                         try {
                             int dist = Integer.parseInt(parts[1]);
-                            forward(-dist);
+                            moveWithBounds(-dist);
                         } catch (NumberFormatException e) {
                             System.out.println("❗ 'reverse' requires a numeric distance.");
                         }
@@ -350,22 +349,26 @@ public class Main extends TurtleGraphics
                         System.out.println("❗ Missing parameters for 'triangle'. Usage: triangle <side1>,<side2>,<side3>");
                     } else {
                         try {
-                            // Split the second part (parameters) by commas
                             String[] sides = parts[1].split(",");
-                            if (sides.length != 3) {
-                                System.out.println("❗ Missing parameters for 'triangle'. Usage: triangle <side1>,<side2>,<side3>");
-                            } else {
-                                // Parse each side
+                            if (sides.length == 1) {
+                                int side = Integer.parseInt(sides[0].trim());
+                                if (side > 0) {
+                                    drawEquilateralTriangle(side);
+                                    System.out.println("✅ Successfully drew an equilateral triangle with side " + side);
+                                } else {
+                                    System.out.println("❗ Side length must be positive.");
+                                }
+                            } else if (sides.length == 3) {
                                 int side1 = Integer.parseInt(sides[0].trim());
                                 int side2 = Integer.parseInt(sides[1].trim());
                                 int side3 = Integer.parseInt(sides[2].trim());
-
-                                // Validate that all sides are positive
-                                if (side1 <= 0 || side2 <= 0 || side3 <= 0) {
-                                    System.out.println("❗ Side lengths must be positive integers.");
-                                } else {
+                                if (side1 > 0 && side2 > 0 && side3 > 0) {
                                     drawTriangle(side1, side2, side3);
+                                } else {
+                                    System.out.println("❗ Side lengths must be positive.");
                                 }
+                            } else {
+                                System.out.println("❗ Invalid parameters for 'triangle'.");
                             }
                         } catch (NumberFormatException e) {
                             System.out.println("❗ 'triangle' requires numeric side lengths.");
