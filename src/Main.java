@@ -218,8 +218,9 @@ public class Main extends TurtleGraphics
     @Override
     public void about() {
         super.about(); // Call the original about
-        displayMessage("Project by ChromeDynamo"); // Add your name here
+        displayMessage("Project by ChromeDynamo");
     }
+
     @Override
     public void processCommand(String command) {
         if (command == null || command.trim().isEmpty()) {
@@ -250,7 +251,7 @@ public class Main extends TurtleGraphics
 
                 case "left":
                     if (parts.length < 2) {
-                        System.out.println("❗ Missing angle for 'left'");
+                        left(90);
                     } else {
                         try {
                             int angle = Integer.parseInt(parts[1]);
@@ -263,7 +264,7 @@ public class Main extends TurtleGraphics
 
                 case "right":
                     if (parts.length < 2) {
-                        System.out.println("❗ Missing angle for 'right'");
+                        right(90);
                     } else {
                         try {
                             int angle = Integer.parseInt(parts[1]);
@@ -276,7 +277,7 @@ public class Main extends TurtleGraphics
 
                 case "move":
                     if (parts.length < 2) {
-                        System.out.println("❗ Missing distance for 'move'");
+                        forward(100);
                     } else {
                         try {
                             int dist = Integer.parseInt(parts[1]);
@@ -289,7 +290,7 @@ public class Main extends TurtleGraphics
 
                 case "reverse":
                     if (parts.length < 2) {
-                        System.out.println("❗ Missing distance for 'reverse'");
+                        forward(-100);
                     } else {
                         try {
                             int dist = Integer.parseInt(parts[1]);
@@ -302,7 +303,7 @@ public class Main extends TurtleGraphics
 
                 case "reset":
                     reset(); // Reset position and orientation
-                    setPenColour(Color.RED); // Reset pen color to default (black)
+                    setPenColour(Color.RED); // Reset pen color to default (red)
                     setStroke(1); // Reset pen width to default (1)
                     System.out.println("Reset: Position, orientation, pen color, and pen width.");
                     break;
